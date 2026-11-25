@@ -1,0 +1,44 @@
+{
+  "passed": true,
+  "synthetic": true,
+  "nativeStates": 10,
+  "nativePlayerComparisons": 40,
+  "expected": {
+    "from": 6,
+    "to": 7,
+    "total": 1,
+    "components": [
+      {
+        "label": "Placar",
+        "effect": 0.5,
+        "source": "context",
+        "sequence": 1
+      },
+      {
+        "label": "Gol",
+        "effect": 0.5,
+        "source": "event",
+        "sequence": 3
+      }
+    ],
+    "eventEffect": 0.5,
+    "contextEffect": 0.5,
+    "playerEffect": 0.5,
+    "remainingEffect": 0.5,
+    "stateNotes": [
+      6,
+      6.5,
+      6.5,
+      6.5,
+      6.5,
+      6.5,
+      7,
+      7,
+      7,
+      7
+    ],
+    "definition": "native-event-marginals-at-observed-context",
+    "historicalActionAttribution": false,
+    "physicalActionValidated": false
+  }
+}

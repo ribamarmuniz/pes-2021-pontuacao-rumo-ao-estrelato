@@ -1,0 +1,11 @@
+const fs=require('fs'),path=require('path'),cp=require('child_process');
+const {buildEventProbe}=require('./event-probe-code.cjs'),{buildContextProbe}=require('./event-context-code.cjs');
+const run=cp.spawnSync('pwsh',['-NoProfile','-File',path.join(__dirname,'read-context-buffer.ps1')],{encoding:'utf8',windowsHide:true,timeout:30000});
+if(run.status!==0)throw Error('Read-only inspection failed '+run.stderr);
+const x=JSON.parse(run.stdout),full=buildContextProbe(x.address,x.base,{targetRva:x.legacyAddress-x.base});
+const legacy=buildEventProbe(x.legacyAddress,x.base),context=buildEventProbe(x.legacyAddress+0xa00,x.base,{storageBase:x.legacyAddress,targetRva:0xa23c10,payload:false,maxCodeBytes:0x300});
+if(!full.equals(Buffer.from(x.codeHex,'hex'))||!legacy.equals(Buffer.from(x.legacyCodeHex,'hex'))||!context.equals(Buffer.from(x.contextCodeHex,'hex')))throw Error('Active native code differs');
+delete x.codeHex;delete x.legacyCodeHex;delete x.contextCodeHex;
+const report={...x,wrappersMatchValidatedCode:true,checkedAt:new Date().toISOString()};
+fs.writeFileSync(path.join(__dirname,'context-buffer-health.json'),JSON.stringify(report,null,2)+'\n');
+console.log(JSON.stringify({pid:x.pid,readOnly:true,enabled:x.enabled,head:x.head,stableSlots:x.slots.length,wrappersMatchValidatedCode:true},null,2));

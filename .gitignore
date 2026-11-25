@@ -1,0 +1,20 @@
+# Dados locais de partidas e ferramentas
+*.log
+*.balc
+*.tmp*
+.tool-cache/
+node_modules/
+startup.cache
+*.exe
+*.dll
+*.zip
+*.bin
+*-validation.json
+*-selftest.json
+raw-event-audit-*.csv
+raw-event-audit-*.json
+CONTEXTO-PES2021.md
+.env
+.env.*
+Thumbs.db
+Desktop.ini
