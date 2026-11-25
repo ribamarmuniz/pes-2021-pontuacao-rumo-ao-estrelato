@@ -1197,7 +1197,9 @@ function m.sample(now,ctx,root,player_id,note)
         if not unique_again or ffi.string(unique_again,80*16)~=ffi.string(unique,80*16) then return end
     end
     local values={}
-    for i=0,0x294/4 do values[#values+1]=tonumber(cf[i]) end
+    -- Preserve byte offsets even if an unused float word converts to nil.
+    -- Appending with #values silently shifted all following constants.
+    for i=0,0x294/4 do values[i+1]=tonumber(cf[i]) or (0/0) end
     local settings=world and ptr(world+0x2c0)
     local matchtime=settings and read(settings+0x58,4)
     local duration=matchtime and tonumber(ffi.cast("float *",matchtime)[0]) or 10
