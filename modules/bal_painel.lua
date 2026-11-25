@@ -1,6 +1,6 @@
--- Painel 0.13: F6 mostra/oculta; F8 alterna o historico.
+-- Painel 0.14: F6 mostra/oculta; F8 alterna o historico.
 -- FPS mede chamadas display_frame em intervalos de 0.5 s usando o QPC.
-local m = { version = "0.13" }
+local m = { version = "0.14" }
 -- BEGIN embedded rating model
 -- Reference factory. The installed module embeds this factory before use.
 -- A caller supplies float32 rounding. No game memory is written here.
@@ -305,8 +305,8 @@ local function extend_observed_context_model(model,F)
             if g.before.match~=before.match or g.after.match~=before.match or not ga or not gb
                 or ga.v[1]~=a.v[1] or gb.v[1]~=a.v[1] or ga.v[2]~=a.v[2] or gb.v[2]~=a.v[2]
                 or ga.v[4]~=a.v[4] or gb.v[4]~=a.v[4] then return end
-            append(model.context_label(last_input,g.before),sub(g.beforeNote,current),"context",g.sequence)
-            append(g.contextUpdate and model.context_label(g.before,g.after) or model.event_label(g.before,g.after,id),
+            append(g.contextBeforeLabel or model.context_label(last_input,g.before),sub(g.beforeNote,current),"context",g.sequence)
+            append(g.eventLabel or (g.contextUpdate and model.context_label(g.before,g.after) or model.event_label(g.before,g.after,id)),
                 sub(g.afterNote,g.beforeNote),g.contextUpdate and "context" or "event",g.sequence)
             notes[#notes+1]=g.beforeNote;notes[#notes+1]=g.afterNote
             current,last_input=g.afterNote,g.after
@@ -340,7 +340,7 @@ end
 -- END embedded observed context
 local rating_capture = (function()
 -- Captura e validacao do calculo original. Nunca escreve notas ou estatisticas.
-local m = { version = "0.13" }
+local m = { version = "0.14" }
 local kernel, capture, next_sample, last_note, last_key, budget = nil,nil,0,nil,nil,96
 local last_snapshot_time=0
 local function read(address,size)
@@ -808,6 +808,25 @@ local function create_full_context_probe(kernel,read,ptr,archive_line,session,mo
         e.groups={};e.base=nil;e.ready=false;e.budget=32768;e.epoch=e.epoch+1
         if e.address then e.cursor=ptr(e.address+0x3000) or e.cursor;memory.write(e.address+0x3018,"\x01") end
     end
+    -- Keep exact labels and identity at intermediate boundaries. Only the first
+    -- before-state and last after-state of each generation need full context.
+    local function identity(input)
+        local players={}
+        for _,p in ipairs(input.players) do
+            if p.v[3]==2147483834 then players[#players+1]={v=p.v} end
+        end
+        return {match=input.match,players=players}
+    end
+    function e.retain(g)
+        local previous=e.groups[#e.groups]
+        g.eventLabel=g.contextUpdate and model.context_label(g.before,g.after) or model.event_label(g.before,g.after,2147483834)
+        if previous and previous.generationAfter==g.generationBefore and previous.match==g.match and previous.epoch==g.epoch then
+            g.contextBeforeLabel=model.context_label(previous.after,g.before)
+            previous.after=identity(previous.after)
+            g.before=identity(g.before)
+        end
+        e.groups[#e.groups+1]=g
+    end
     function e.drain(ctx,root)
         if not e.address or e.budget<=0 then return end
         local head=ptr(e.address+0x3000)
@@ -836,7 +855,7 @@ local function create_full_context_probe(kernel,read,ptr,archive_line,session,mo
                     end
                     e.last_gap=nil
                     if e.ready then
-                        if #e.groups<1024 then e.groups[#e.groups+1]=g else e.gap("interval-budget",seq) end
+                        e.retain(g)
                     end
                     e.budget=e.budget-1
                 end
@@ -866,6 +885,9 @@ local function create_full_context_probe(kernel,read,ptr,archive_line,session,mo
         if valid then
             e.base=input;e.ready=e.address~=nil and e.budget>0
             local future={};for _,g in ipairs(e.groups) do if g.generationBefore>=input.generation then future[#future+1]=g end end;e.groups=future
+            -- The safety ceiling bounds a single interval, rather than disabling
+            -- capture after many otherwise complete intervals in a long match.
+            if e.address then e.budget=32768;memory.write(e.address+0x3018,"\x01");e.ready=true end
         else e.base=nil;e.groups={};e.ready=false end
         return result
     end
@@ -1561,7 +1583,7 @@ function m.display_frame(ctx)
         fps = frame_count / elapsed
         frame_count, window_start = 0, now
         if not sample_logged then
-            local sample = string.format("BAL Painel 0.13: primeira amostra %.1f FPS (display_frame/QPC).", fps)
+            local sample = string.format("BAL Painel 0.14: primeira amostra %.1f FPS (display_frame/QPC).", fps)
             log(sample)
             save_status(sample)
             sample_logged = true
@@ -1721,7 +1743,7 @@ function m.init(ctx)
         end
         local compact = compact_header()
         if compact and sider_base then narrow_background = prepare_background() end
-        local message = "BAL Painel 0.13: cabecalho compacto " .. (compact and "aplicado." or "nao aplicado: versao diferente ou formato inesperado.")
+        local message = "BAL Painel 0.14: cabecalho compacto " .. (compact and "aplicado." or "nao aplicado: versao diferente ou formato inesperado.")
         log(message)
         save_status(message)
         save_status(narrow_background and "Fundo limitado a largura do texto." or "Fundo compacto indisponivel para este binario.")
@@ -1730,8 +1752,8 @@ function m.init(ctx)
     ctx.register("show", m.show)
     ctx.register("hide", m.hide)
     ctx.register("key_up", m.key_up)
-    log("BAL Painel 0.13: FPS; F8 alterna historico. Nota original extraida da memoria do jogo.")
-    save_status("Painel 0.13 ativo. F6 mostra/oculta; F8 alterna historico; inicia oculto.")
+    log("BAL Painel 0.14: FPS; F8 alterna historico. Nota original extraida da memoria do jogo.")
+    save_status("Painel 0.14 ativo. F6 mostra/oculta; F8 alterna historico; inicia oculto.")
 end
 
 return m

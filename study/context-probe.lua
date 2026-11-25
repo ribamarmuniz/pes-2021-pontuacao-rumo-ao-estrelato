@@ -54,6 +54,25 @@ local function create_full_context_probe(kernel,read,ptr,archive_line,session,mo
         e.groups={};e.base=nil;e.ready=false;e.budget=32768;e.epoch=e.epoch+1
         if e.address then e.cursor=ptr(e.address+0x3000) or e.cursor;memory.write(e.address+0x3018,"\x01") end
     end
+    -- Keep exact labels and identity at intermediate boundaries. Only the first
+    -- before-state and last after-state of each generation need full context.
+    local function identity(input)
+        local players={}
+        for _,p in ipairs(input.players) do
+            if p.v[3]==2147483834 then players[#players+1]={v=p.v} end
+        end
+        return {match=input.match,players=players}
+    end
+    function e.retain(g)
+        local previous=e.groups[#e.groups]
+        g.eventLabel=g.contextUpdate and model.context_label(g.before,g.after) or model.event_label(g.before,g.after,2147483834)
+        if previous and previous.generationAfter==g.generationBefore and previous.match==g.match and previous.epoch==g.epoch then
+            g.contextBeforeLabel=model.context_label(previous.after,g.before)
+            previous.after=identity(previous.after)
+            g.before=identity(g.before)
+        end
+        e.groups[#e.groups+1]=g
+    end
     function e.drain(ctx,root)
         if not e.address or e.budget<=0 then return end
         local head=ptr(e.address+0x3000)
@@ -82,7 +101,7 @@ local function create_full_context_probe(kernel,read,ptr,archive_line,session,mo
                     end
                     e.last_gap=nil
                     if e.ready then
-                        if #e.groups<1024 then e.groups[#e.groups+1]=g else e.gap("interval-budget",seq) end
+                        e.retain(g)
                     end
                     e.budget=e.budget-1
                 end
@@ -112,6 +131,9 @@ local function create_full_context_probe(kernel,read,ptr,archive_line,session,mo
         if valid then
             e.base=input;e.ready=e.address~=nil and e.budget>0
             local future={};for _,g in ipairs(e.groups) do if g.generationBefore>=input.generation then future[#future+1]=g end end;e.groups=future
+            -- The safety ceiling bounds a single interval, rather than disabling
+            -- capture after many otherwise complete intervals in a long match.
+            if e.address then e.budget=32768;memory.write(e.address+0x3018,"\x01");e.ready=true end
         else e.base=nil;e.groups={};e.ready=false end
         return result
     end

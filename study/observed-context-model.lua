@@ -77,8 +77,8 @@ local function extend_observed_context_model(model,F)
             if g.before.match~=before.match or g.after.match~=before.match or not ga or not gb
                 or ga.v[1]~=a.v[1] or gb.v[1]~=a.v[1] or ga.v[2]~=a.v[2] or gb.v[2]~=a.v[2]
                 or ga.v[4]~=a.v[4] or gb.v[4]~=a.v[4] then return end
-            append(model.context_label(last_input,g.before),sub(g.beforeNote,current),"context",g.sequence)
-            append(g.contextUpdate and model.context_label(g.before,g.after) or model.event_label(g.before,g.after,id),
+            append(g.contextBeforeLabel or model.context_label(last_input,g.before),sub(g.beforeNote,current),"context",g.sequence)
+            append(g.eventLabel or (g.contextUpdate and model.context_label(g.before,g.after) or model.event_label(g.before,g.after,id)),
                 sub(g.afterNote,g.beforeNote),g.contextUpdate and "context" or "event",g.sequence)
             notes[#notes+1]=g.beforeNote;notes[#notes+1]=g.afterNote
             current,last_input=g.afterNote,g.after
