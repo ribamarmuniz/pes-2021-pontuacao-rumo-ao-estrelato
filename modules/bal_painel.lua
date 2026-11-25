@@ -1531,7 +1531,7 @@ local function fit_background(text)
         local wide = wide_ascii(line)
         if measure_dc and gdi32.GetTextExtentPoint32W(measure_dc, ffi.cast("const uint16_t *", wide), #line, measure_size) ~= 0 then
             -- GDI and DirectWrite can differ slightly in glyph spacing.
-            width = math.max(width, math.ceil(tonumber(measure_size[0]) * 1.08) + 24)
+            width = math.max(width, math.ceil(tonumber(measure_size[0]) * 1.04) + 12)
         else
             width = math.max(width, #line * 16 + 18)
         end
