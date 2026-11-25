@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="190" viewBox="0 0 1000 190">
+<rect width="1000" height="190" rx="12" fill="#15191e"/>
+<g font-family="Segoe UI,Arial,sans-serif" fill="#ffb34d">
+<rect x="34" y="40" width="105" height="66" rx="9" fill="#292e35" stroke="#ffb34d"/>
+<text x="86" y="84" text-anchor="middle" font-size="34" font-weight="600">F6</text>
+<text x="166" y="70" font-size="25" font-weight="600">Mostrar ou ocultar</text>
+<text x="166" y="103" font-size="21" fill="#e1e4e8">O histórico continua a ser registrado.</text>
+<rect x="535" y="40" width="105" height="66" rx="9" fill="#292e35" stroke="#ffb34d"/>
+<text x="587" y="84" text-anchor="middle" font-size="34" font-weight="600">F8</text>
+<text x="666" y="70" font-size="25" font-weight="600">Abrir o histórico</text>
+<text x="666" y="103" font-size="21" fill="#e1e4e8">Pressione de novo para recolher.</text>
+<text x="34" y="157" font-size="18" fill="#aeb6bf">PES 2021 · Rumo ao Estrelato · Painel de pontuação</text>
+</g></svg>

@@ -1302,7 +1302,7 @@ local stats_capture
 local sider_base, width_slot, narrow_background
 local user32, gdi32, measure_dc, measure_font, measure_size, client_rect
 local last_text, expanded = nil, false
-local opts = { text_color = "ffb34dff", background_color = "00000080", location = "top" }
+local opts = { text_color = "ffb34dff", background_color = "0000008d", location = "top" }
 
 local function save_status(text)
     log(text)
@@ -1705,7 +1705,7 @@ function m.init(ctx)
             measure_dc, measure_font = ctx.bal_panel_measure.dc, ctx.bal_panel_measure.font
         else
             measure_dc = gdi32.CreateCompatibleDC(nil)
-            measure_font = gdi32.CreateFontA(24, 0, 0, 0, 400, 0, 0, 0, 1, 0, 0, 4, 1, "Lucida Console")
+            measure_font = gdi32.CreateFontA(24, 0, 0, 0, 600, 0, 0, 0, 1, 0, 0, 4, 1, "Segoe UI")
             if measure_dc ~= nil and measure_font ~= nil then
                 gdi32.SelectObject(measure_dc, measure_font)
                 ctx.bal_panel_measure = {dc = measure_dc, font = measure_font}

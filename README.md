@@ -1,88 +1,137 @@
-# Painel de nota para PES 2021
+# PES 2021 | Pontuação no Rumo ao Estrelato
 
-Painel para o modo Rumo ao Estrelato do PES 2021 no Windows, desenvolvido como módulo Lua do Sider. A interface mostra os FPS e a nota original do jogador durante a partida, com um histórico das mudanças de nota e dos efeitos que o modelo conseguiu conferir nas capturas do jogo.
+O painel mostra a nota do jogador durante as partidas do Rumo ao Estrelato no PES 2021 e registra as mudanças em um histórico que pode ser aberto pelo teclado, sem precisar esperar a tela de resultados para acompanhar a avaliação do jogo.
 
-## Interface
+O projeto funciona no PC como um módulo Lua do Sider, com a configuração testada no PES 2021 versão 1.01.00 e Sider 7.4.1, enquanto o modo Rumo ao Estrelato também aparece com o nome Become a Legend nas versões em inglês.
 
-O modo compacto exibe a nota atual e a última alteração, enquanto o histórico apresenta uma linha por efeito, sem títulos duplicados. A última linha informa a primeira nota identificada na partida, como `6.0 Nota inicial`, e os demais valores usam vírgula decimal na apresentação.
+## Como fica no jogo
 
-![Histórico da nota com uma linha por efeito](docs/images/historico.jpg)
+O modo compacto reúne os FPS e a nota atual acima da última alteração, ocupando o canto da tela para permitir a consulta durante a partida sem manter o histórico inteiro aberto.
 
-![Painel compacto durante o jogo](docs/images/compacto.jpg)
+<img src="docs/images/compacto.jpg" alt="Painel compacto com FPS 72, nota 7,5 e aumento de 0,5 por jogo coletivo" width="540">
 
-As imagens são recortes das fotografias da versão em uso, restritos à área do painel dentro da tela. Os valores mostrados correspondem à partida fotografada.
+O histórico apresenta uma linha por efeito e mantém a primeira nota identificada no final da lista, como no exemplo `6.0 Nota inicial`, para que as mudanças seguintes possam ser comparadas com o valor de partida.
 
-## Requisitos e compatibilidade
+<img src="docs/images/historico.jpg" alt="Histórico com jogo coletivo, gol, desarme e nota inicial 6.0" width="480">
 
-O módulo foi usado no Windows com PES 2021 versão 1.01.00 e Sider 7.4.1, com LuaJIT e as extensões de memória habilitadas. Os endereços e as assinaturas foram verificados nessa instalação, portanto a compatibilidade com outras versões do executável precisa de validação própria.
+As imagens foram recortadas das fotos do painel em uso, enquanto a configuração atual usa um fundo um pouco mais escuro e fonte seminegrita, ajustes que entram em uso após abrir novamente o jogo com o Sider.
 
-A configuração atual acompanha o jogador de carreira com ID `2147483834`. Esse ID pode ser diferente em outro save e deve ser conferido antes de usar o painel em outra carreira. O módulo não oferece uma tela de seleção de jogador.
+## Antes de instalar
 
-## Instalação
+Para usar o painel, é preciso ter o PES 2021 instalado no Windows e localizar a pasta do Sider, aproveitando a instalação existente caso o jogo já use um patch que inclua esse programa.
 
-Instale o Sider a partir da distribuição do autor e copie `modules/bal_painel.lua` para a pasta `modules` dessa instalação. Adicione as opções abaixo ao arquivo `sider.ini`, preservando as configurações dos módulos e patches já instalados.
+A configuração acompanha o jogador de carreira com ID `2147483834`, usado durante o desenvolvimento, por isso outra carreira exige conferir o ID do jogador e validar a leitura antes do uso, já que o painel ainda não oferece seleção automática.
+
+## Instalação passo a passo
+
+### 1. Baixe os arquivos
+
+No início desta página, abra o botão `Code` e escolha `Download ZIP`, depois clique com o botão direito no arquivo baixado e use `Extrair tudo` para acessar a pasta `modules` e o restante do projeto.
+
+### 2. Encontre a pasta do Sider
+
+Localize a pasta que contém `sider.exe` e `sider.ini`, que pode se chamar `Sider` ou `SiderAddons` nos patches, e faça uma cópia do `sider.ini` antes de editá-lo para guardar a configuração que já funciona no seu jogo.
+
+Se o Sider ainda não estiver instalado, baixe a versão 7.4.1 na [página do autor](https://mapote.com/doc/sider/) e extraia os arquivos em uma pasta em que seu usuário possa gravar, como `Documentos\Sider-PES2021`, pois essa dependência não acompanha o projeto.
+
+### 3. Copie o módulo
+
+Com o PES fechado, abra a pasta `modules` do projeto e copie `bal_painel.lua` para a pasta `modules` do Sider, mantendo a organização mostrada abaixo para que o programa encontre o arquivo ao iniciar.
+
+```text
+Sider-PES2021/
+    sider.exe
+    sider.dll
+    sider.ini
+    modules/
+        bal_painel.lua
+```
+
+Os arquivos de `study` e as imagens do README podem ficar fora da instalação, enquanto `bal_affinity.lua` e `bal_1610.lua` são módulos opcionais que também não precisam ser ativados para mostrar a nota.
+
+### 4. Configure o sider.ini
+
+Abra `sider.ini` no Bloco de Notas e acrescente a linha abaixo na seção `[sider]`, junto das entradas `lua.module` que já estiverem no arquivo, preservando os módulos usados pelo seu patch.
 
 ```ini
-[sider]
+lua.module = "bal_painel.lua"
+```
+
+Confira as opções abaixo e ajuste as linhas que já existirem, acrescentando somente as que estiverem ausentes para evitar configurações duplicadas, com uma única seção `[sider]` no arquivo.
+
+```ini
 lua.enabled = 1
 luajit.ext.enabled = 1
 match-stats.enabled = 1
-lua.module = "bal_painel.lua"
 overlay.enabled = 1
 overlay.on-from-start = 0
-overlay.font = "Lucida Console"
-overlay.font-size = 24
 overlay.location = "top"
+overlay.font = "Segoe UI Semibold"
+overlay.font-size = 24
 overlay.text-color = "ffb34dff"
-overlay.background-color = "00000080"
+overlay.background-color = "0000008d"
 overlay.vkey.toggle = 0x75
 overlay.block-input-when-on = 0
 ```
 
-Abra o PES com o Sider e entre no Rumo ao Estrelato. O painel começa oculto, e a primeira nota aparece quando o PES calcula um valor válido para o jogador.
+Salve o `sider.ini` depois da edição e abra o jogo novamente com o Sider para carregar a fonte, que fica em tamanho 24 sobre um fundo preto com cerca de 55% de opacidade.
 
-## Controles
+### 5. Confira o caminho do jogo
 
-| Tecla | Função |
-| --- | --- |
-| F6 | Mostrar ou ocultar o painel |
-| F8 | Alternar entre o modo compacto e o histórico |
-| Shift + R | Recarregar módulos modificados do Sider em uma tela de pausa |
+Se o patch já tem um iniciador que abre o PES com o Sider, mantenha esse iniciador e o caminho configurado pelo autor do patch, usando os exemplos desta etapa apenas quando precisar configurar uma instalação nova.
 
-O histórico continua a receber mudanças quando o painel está oculto. A primeira nota constitui o ponto inicial da comparação e não recebe uma variação fictícia.
+Para abrir a versão Steam, a seção `[sider]` pode usar as linhas abaixo, que identificam o executável e solicitam a abertura do jogo pela biblioteca da Steam.
 
-## Leitura dos resultados
-
-A nota exibida vem diretamente do PES. O modelo usa os dados capturados para conferir os pontos internos e calcular efeitos condicionais nos estados anteriores e posteriores aos eventos nativos, com operações em precisão float32.
-
-Rótulos como `Gol`, `Desarme` e `Jogo coletivo` identificam a classificação usada para o evento observado. Um resultado como `+0,5 Gol` pertence ao estado daquela partida e não estabelece um bônus fixo por gol. Um evento interno pode envolver várias alterações de estatísticas, e a comparação entre jogadores também interfere na nota.
-
-`Contexto da partida` reúne efeitos que o cálculo não separou em uma ação individual. `Causa nao identificada` informa que a mudança da nota foi registrada, mas não houve uma explicação conferida para ela. O sufixo `(contexto fixo)` identifica o caminho anterior de análise condicional, cujo cálculo mantém o contexto posterior fixo.
-
-A atribuição física de uma única ação e a causa histórica exclusiva de cada mudança continuam sem validação completa. As verificações existentes sustentam a leitura da nota e os efeitos condicionais nos casos capturados, com esses limites preservados no código.
-
-## Arquivos do projeto
-
-`modules` contém o painel e dois módulos opcionais. `bal_affinity.lua` aplica afinidade aos processadores de 0 a 11, ajuste específico da máquina usada no desenvolvimento, que deve ser avaliado antes do uso em outro computador. `bal_1610.lua` contém o ajuste opcional de proporção de tela e depende dos recursos de interface disponíveis na instalação local.
-
-`study` contém o código de pesquisa e os verificadores usados durante o desenvolvimento. Esses arquivos ficam separados da instalação do usuário, pois não são necessários para exibir o painel. Os logs reais e os dumps não acompanham o repositório.
-
-## Dados de pesquisa
-
-O módulo pode gerar `sider.log`, `bal-rating-captures.log` e `bal-context-captures.balc` na pasta do Sider. Os dois últimos arquivos preservam dados cumulativos para análise, e o arquivo BALC usa compressão XPRESS_HUFF com conferência SHA256. Esses registros podem crescer durante o uso e devem permanecer fora dos commits.
-
-A ferramenta `study/audit-raw-events.cjs` reprocessa capturas existentes e exporta os efeitos em CSV. Sua execução exige Node.js e PowerShell 7 no Windows. A base contínua exportada vem do modelo antes da quantização da base e não deve ser apresentada como um valor intermediário lido diretamente do executável.
-
-```powershell
-node study/audit-raw-events.cjs "C:\Sider\bal-rating-captures.log" "IDENTIFICADOR_DA_SESSAO" "C:\Sider\bal-context-captures.balc"
+```ini
+exe.name = "\PES2021.exe"
+start.game = "steam://rungameid/1259970"
 ```
 
-Os ensaios que executam rotinas nativas isoladas precisam dos arquivos locais do jogo e de dependências de desenvolvimento próprias. Eles não constituem um procedimento de instalação do painel.
+Se a instalação usa um caminho direto, substitua o valor de `start.game` pela localização real do seu executável, usando o exemplo abaixo como referência e mantendo somente uma linha `start.game` no arquivo.
 
-Os scripts de pesquisa que precisam de arquivos do PES usam `C:\Games\PES2021` como caminho de referência na cópia pública. Ajuste esse caminho para sua instalação antes de executar esses ensaios. Os scripts históricos de integração e empacotamento registram etapas do desenvolvimento e não devem ser usados para reinstalar a versão atual.
+```ini
+exe.name = "\PES2021.exe"
+start.game = "C:\Games\PES2021\PES2021.exe"
+```
 
-## Dependências e distribuição
+### 6. Abra a carreira
 
-O Sider é um projeto de Anton Jouline (juce), disponível na [página do autor](https://mapote.com/doc/sider/). Sua [documentação de módulos Lua](https://mapote.com/doc/sider/sider7/scripting.html) descreve a interface usada pelo painel.
+Execute `sider.exe` ou o iniciador do patch e entre em uma partida do Rumo ao Estrelato, depois pressione `F6` para mostrar o painel e aguarde a primeira nota válida, já que o campo pode aparecer como `--` antes do cálculo do PES.
 
-Este repositório contém o código do painel e sua documentação. O executável do PES, os arquivos do jogo e os binários do Sider não fazem parte desta cópia pública. Cada dependência mantém as condições de uso e os direitos de seus autores. O projeto não tem vínculo com a Konami.
+A primeira nota vira a referência inicial do histórico, que recebe as alterações seguintes conforme o jogo atualiza a avaliação do jogador, sem acrescentar um aumento fictício ao primeiro valor encontrado.
+
+### 7. Consulte o histórico
+
+Use `F8` para abrir o histórico e pressione a mesma tecla para voltar ao modo compacto, enquanto `F6` mostra ou oculta o painel sem interromper o registro das mudanças durante a partida.
+
+![Controles do painel, com F6 para mostrar ou ocultar e F8 para alternar o histórico](docs/images/controles.svg)
+
+## Como ler as alterações
+
+A nota atual é lida do PES e permanece sob controle do jogo, enquanto o painel usa as capturas para conferir os efeitos das mudanças de estatísticas sem escrever notas ou gols no save.
+
+Uma entrada como `+0,5 Gol` corresponde ao efeito conferido naquele estado da partida, e não a um valor fixo para todo gol, porque a posição do jogador e os limites do cálculo podem permitir o aumento dos pontos internos sem alterar a nota exibida.
+
+O texto `Contexto da partida` agrupa efeitos associados a dados coletivos ou a mudanças que o modelo não separou em uma ação individual, enquanto `Causa nao identificada` informa que a nota mudou sem uma explicação conferida para aquele intervalo.
+
+O sufixo `(contexto fixo)` identifica o método anterior de comparação, que mantém o contexto posterior da partida fixo, e os nomes dos eventos continuam sujeitos à limitação de que ainda não foi validada uma causa exclusiva por ação física para todas as mudanças de nota.
+
+## Se o painel não funcionar
+
+| Situação | O que conferir |
+| --- | --- |
+| F6 não mostra o painel | Confira se o jogo abriu com o Sider e se `bal_painel.lua` está em `modules` e na lista do `sider.ini`. |
+| Aparecem FPS, mas a nota não é encontrada | Confira o ID do jogador e a versão do executável, pois a leitura foi verificada com a configuração indicada no início deste README. |
+| O campo da nota continua como `--` | Aguarde o cálculo do PES e, se o problema continuar, confira o ID do jogador e as mensagens do `sider.log`. |
+| A fonte continua igual após editar o arquivo | Feche o jogo e abra novamente pelo Sider para carregar a configuração salva no `sider.ini`. |
+| Aparece um erro do módulo | Abra `sider.log` na pasta do Sider e procure as mensagens com `bal_painel.lua` ou `lua ERROR` para identificar onde a leitura parou. |
+
+Para desativar o painel, feche o jogo e remova a linha `lua.module = "bal_painel.lua"` do `sider.ini`, preservando as outras entradas para que os módulos do patch continuem disponíveis.
+
+## Código e pesquisa
+
+O código do painel fica em `modules/bal_painel.lua`, com os modelos de cálculo e verificadores separados em `study` para quem quiser acompanhar a pesquisa descrita em [docs/PESQUISA.md](docs/PESQUISA.md), sem precisar desses arquivos para instalar o módulo.
+
+Os registros de partida ficam na pasta local do Sider e não acompanham o repositório, que também não distribui o executável ou os arquivos do PES e não tem vínculo com a Konami.
+
+O Sider foi desenvolvido por Anton Jouline (juce), cuja [documentação](https://mapote.com/doc/sider/sider7/readme.html) descreve a instalação e as opções do programa, enquanto o módulo opcional de proporção de tela mantém os créditos da técnica de Durandil67 e da adaptação de eskay993.
