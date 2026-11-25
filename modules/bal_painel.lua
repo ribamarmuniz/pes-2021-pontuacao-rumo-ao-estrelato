@@ -1530,7 +1530,8 @@ local function fit_background(text)
     for line in (text .. "\n"):gmatch("([^\n]*)\n") do
         local wide = wide_ascii(line)
         if measure_dc and gdi32.GetTextExtentPoint32W(measure_dc, ffi.cast("const uint16_t *", wide), #line, measure_size) ~= 0 then
-            width = math.max(width, tonumber(measure_size[0]) + 18)
+            -- GDI and DirectWrite can differ slightly in glyph spacing.
+            width = math.max(width, math.ceil(tonumber(measure_size[0]) * 1.08) + 24)
         else
             width = math.max(width, #line * 16 + 18)
         end
@@ -1701,14 +1702,16 @@ function m.init(ctx)
         local base = kernel.GetModuleHandleA("sider.dll")
         if base ~= nil then sider_base = tonumber(ffi.cast("uintptr_t", base)) end
         client_rect, measure_size = ffi.new("int32_t[4]"), ffi.new("int32_t[2]")
-        if ctx.bal_panel_measure then
+        if ctx.bal_panel_measure and ctx.bal_panel_measure.style=="segoe-24em-600-v2" then
             measure_dc, measure_font = ctx.bal_panel_measure.dc, ctx.bal_panel_measure.font
         else
             measure_dc = gdi32.CreateCompatibleDC(nil)
-            measure_font = gdi32.CreateFontA(24, 0, 0, 0, 600, 0, 0, 0, 1, 0, 0, 4, 1, "Segoe UI")
+            -- Negative height specifies character height, matching Sider's font size.
+            -- Positive height includes internal leading and made the measured text too narrow.
+            measure_font = gdi32.CreateFontA(-24, 0, 0, 0, 600, 0, 0, 0, 1, 0, 0, 4, 1, "Segoe UI")
             if measure_dc ~= nil and measure_font ~= nil then
                 gdi32.SelectObject(measure_dc, measure_font)
-                ctx.bal_panel_measure = {dc = measure_dc, font = measure_font}
+                ctx.bal_panel_measure = {dc = measure_dc, font = measure_font,style="segoe-24em-600-v2"}
             end
         end
         local freq = ffi.new("int64_t[1]")
